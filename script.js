@@ -132,7 +132,17 @@ YAHOO.extend(MoodleDDMatchItem, YAHOO.util.DDProxy, {
         }
         // else move item
         else {
+            // add dragstring back to empty box
+            idparts = el1.id.split("_");
+            li = document.createElement("li");
+            li.setAttribute("id", idparts[0] + "_0");
+            li.appendChild(document.createTextNode(this.dragstring));
+            el1parent.appendChild(li);
+
+            // remove from origin
             el1parent.removeChild(el1);
+            
+            // add to target
             el2.appendChild(el1);
         }
     }

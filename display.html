@@ -2,10 +2,6 @@
   <?php echo $questiontext; ?>
 </div>
 
-<?php if ($image) { ?>
-  <img class="qimage" src="<?php echo $image; ?>" alt="" />
-<?php } ?>
-
 <div id="q<?php echo $question->id ?>answer" class="ablock clearfix">
   <table id="answertable<?php echo $nameprefix ?>" class="answer">
     <?php $row = 1; foreach ($anss as $answer) { ?>
@@ -13,7 +9,7 @@
         <td class="c0 text">
           <?php echo $answer->text; ?>
         </td>
-        <td id="td<?php echo $nameprefix.$answer->id ?>" class="matchtd c1 matchcontrol <?php echo $answer->class ?> matchtarget">
+        <td id="td<?php echo $nameprefix.$answer->id ?>" class="matchtd c1 control <?php echo $answer->class ?> matchtarget">
           <?php echo $answer->control; ?>
         </td>
         <td>
@@ -37,7 +33,6 @@ function insertQuestion<?php echo $question->id ?>(e, f, vars) {
 Dom = YAHOO.util.Dom;
 
 var answertable = document.getElementById("answertable<?php echo $nameprefix ?>");
-Dom.addClass(answertable, "matchanswer");
 
 var questioncontentdiv = document.getElementById("q<?php echo $question->id ?>answer");
 var submitbutton = document.getElementsByName("<?php echo $nameprefix ?>submit");
@@ -79,6 +74,7 @@ else {
 <?php } ?>
 
 ddMatchingInit(vars);
+YAHOO.util.Event.addListener("responseform", "click", ddMatchingSetHiddens, vars);
 
 }
 
@@ -91,7 +87,6 @@ vars.readonly = <?php echo $options->readonly ? "true" : "false" ?>;
 vars.dragstring = "<?php echo $dragstring; ?>";
 
 YAHOO.util.Event.onDOMReady(insertQuestion<?php echo $question->id ?>, vars);
-YAHOO.util.Event.addListener("responseform", "click", ddMatchingSetHiddens, vars);
 
 //]]>
 </script>

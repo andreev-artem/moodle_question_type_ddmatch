@@ -1,4 +1,4 @@
-li.matchdrag {
+.ddmatch li.matchdrag {
     border: 1px solid black;
     background-color: white;
     cursor: move;
@@ -6,7 +6,7 @@ li.matchdrag {
     padding: 4px;
 }
 
-ul.matchorigin {
+.ddmatch ul.matchorigin {
     width: 35%;
     border: 1px solid gray;
     list-style: none;
@@ -15,7 +15,11 @@ ul.matchorigin {
     float: right;
 }
 
-ul.matchtarget {
+.ddmatch .matchorigin li {
+    list-style:none;
+}
+
+.ddmatch ul.matchtarget {
     border: 1px solid black;
     list-style: none;
     min-height: 30px;
@@ -23,20 +27,26 @@ ul.matchtarget {
     padding: 4px;
 }
 
-ul.matchdefault {
+.ddmatch .matchtarget li {
+    list-style:none;
+}
+
+.ddmatch ul.matchdefault {
     border: 2px solid gray;
 }
 
-ul.matchover {
+.ddmatch ul.matchover {
     border: 2px dotted red;
 }
 
-.que .matchcontrol {
-	width: 50%;
-	margin: 6px;
-	padding: 4px;
+.ddmatch td.control {
+    width: 50%;
+    margin: 6px;
+    padding: 4px;
 }
 
-.que .matchanswer {
-	width: 60%;
+.ddmatch table.answer {
+    float: left;
+    width: 60%;
+    margin-bottom: 0.5em;
 }
