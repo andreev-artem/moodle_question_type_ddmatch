@@ -132,9 +132,10 @@ class question_ddmatch_qtype extends default_questiontype {
             // and grading functions. This way it is possible to define multiple
             // answers per question, each with different marks and feedback.
             $answer = new stdClass();
-            $answer->id       = $subquestion->code;
-            $answer->answer   = $subquestion->answertext;
-            $answer->fraction = 1.0;
+            $answer->id                 = $subquestion->code;
+            $answer->answertext         = $subquestion->answertext;
+            $answer->answertextformat   = $subquestion->answertextformat;
+            $answer->fraction           = 1.0;
             $state->options->subquestions[$key]->options->answers[$subquestion->code] = clone($answer);
 
             $state->responses[$key] = '';
@@ -300,10 +301,12 @@ class question_ddmatch_qtype extends default_questiontype {
         // Prepare a list of answers, removing duplicates.
         foreach ($subquestions as $subquestion) {
             foreach ($subquestion->options->answers as $ans) {
-                $allanswers[$ans->id] = $ans->answer;
-                if (!in_array($ans->answer, $answers)) {
-                    $answers[$ans->id] = strip_tags(format_string($ans->answer, false));
-                    $answerids[$ans->answer] = $ans->id;
+                $allanswers[$ans->id] = $ans->answertext;
+                if (!in_array($ans->answertext, $answers)) {
+                    $text = quiz_rewrite_question_urls($ans->answertext, 'pluginfile.php', $context->id, 'qtype_ddmatch', 'subanswer', array($state->attempt, $state->question), $subquestion->id);
+                    $answers[$ans->id] = $this->format_text($text, $ans->answertextformat, $cmoptions);
+                    //$answers[$ans->id] = strip_tags(format_string($ans->answer, false));
+                    $answerids[$ans->answertext] = $ans->id;
                 }
             }
         }
@@ -400,7 +403,7 @@ class question_ddmatch_qtype extends default_questiontype {
         $answertexts = array();
         foreach ($subquestions as $subquestion) {
             $ans = reset($subquestion->options->answers);
-            $answertexts[$ans->id] = $ans->answer;
+            $answertexts[$ans->id] = $ans->answertext;
         }
 
         // Add up the grades from each subquestion.
@@ -603,6 +606,8 @@ class question_ddmatch_qtype extends default_questiontype {
                 return false;
             }
 
+            return true;
+        } elseif ($filearea == 'subanswer') {
             return true;
         } else {
             return parent::check_file_access($question, $state, $options, $contextid, $component,
