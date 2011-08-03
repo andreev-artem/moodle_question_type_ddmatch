@@ -39,10 +39,10 @@ class question_ddmatch_qtype extends default_questiontype {
 
         // Insert all the new question+answer pairs
         foreach ($question->subquestions as $key => $questiontext) {
-            if ($questiontext['text'] == '' && trim($question->subanswers[$key]) == '') {
+            if ($questiontext['text'] == '' && trim($question->subanswers[$key]['text']) == '') {
                 continue;
             }
-            if ($questiontext['text'] != '' && trim($question->subanswers[$key]) == '') {
+            if ($questiontext['text'] != '' && trim($question->subanswers[$key]['text']) == '') {
                 $result->notice = get_string('nomatchinganswer', 'quiz', $questiontext);
             }
 
@@ -64,7 +64,9 @@ class question_ddmatch_qtype extends default_questiontype {
             $subquestion->questiontext = $this->import_or_save_files($questiontext,
                     $context, 'qtype_ddmatch', 'subquestion', $subquestion->id);
             $subquestion->questiontextformat = $questiontext['format'];
-            $subquestion->answertext = trim($question->subanswers[$key]);
+            $subquestion->answertext = $this->import_or_save_files($question->subanswers[$key],
+                    $context, 'qtype_ddmatch', 'subanswer', $subquestion->id);
+            $subquestion->answertextformat = $question->subanswers[$key]['format'];
 
             $DB->update_record('question_ddmatch_sub', $subquestion);
 

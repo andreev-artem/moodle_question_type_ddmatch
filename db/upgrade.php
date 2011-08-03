@@ -67,6 +67,31 @@ function xmldb_qtype_ddmatch_upgrade($oldversion) {
         // match savepoint reached
         upgrade_plugin_savepoint(true, 2010121800, 'qtype', 'ddmatch');
     }
+    
+    if ($oldversion < 2011080300) {
+        $table = new xmldb_table('question_ddmatch_sub');
+
+        $field = new xmldb_field('answertextformat', XMLDB_TYPE_INTEGER, '2', null, XMLDB_NOTNULL, null, '0', 'answertext');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        if ($CFG->texteditors !== 'textarea') {
+            $rs = $DB->get_recordset('question_ddmatch_sub', array('answertextformat' => FORMAT_MOODLE), '', 'id,answertext,answertextformat');
+            foreach ($rs as $s) {
+                $s->answertext       = text_to_html($s->answertext, false, false, true);
+                $s->answertextformat = FORMAT_HTML;
+                $DB->update_record('question_ddmatch_sub', $s);
+                upgrade_set_timeout();
+            }
+            $rs->close();
+        }
+        
+        $field = new xmldb_field('answertext', XMLDB_TYPE_TEXT, 'small', null, XMLDB_NOTNULL, null, null, 'questiontextformat');
+        $dbman->change_field_type($table, $field);
+        
+        upgrade_plugin_savepoint(true, 2011080300, 'qtype', 'ddmatch');
+    }
 
     return true;
 }

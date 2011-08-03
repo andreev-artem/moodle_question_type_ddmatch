@@ -18,9 +18,9 @@ class question_edit_ddmatch_form extends question_edit_form {
         $repeated = array();
         $repeated[] =& $mform->createElement('header', 'answerhdr', $label);
         $repeated[] =& $mform->createElement('editor', 'subquestions', get_string('question', 'quiz'), null, $this->editoroptions);
-        $repeated[] =& $mform->createElement('text', 'subanswers', get_string('answer', 'quiz'), array('size'=>50));
+        $repeated[] =& $mform->createElement('editor', 'subanswers', get_string('answer', 'quiz'), null, $this->editoroptions);
         $repeatedoptions['subquestions']['type'] = PARAM_RAW;
-        $repeatedoptions['subanswers']['type'] = PARAM_TEXT;
+        $repeatedoptions['subanswers']['type'] = PARAM_RAW;
         $answersoption = 'subquestions';
         return $repeated;
     }
@@ -47,8 +47,6 @@ class question_edit_ddmatch_form extends question_edit_form {
             if (count($subquestions)) {
                 $key = 0;
                 foreach ($subquestions as $subquestion){
-                    $default_values['subanswers['.$key.']'] = $subquestion->answertext;
-
                     $draftid = file_get_submitted_draft_itemid('subquestions['.$key.']');
                     $default_values['subquestions['.$key.']'] = array();
                     $default_values['subquestions['.$key.']']['format'] = $subquestion->questiontextformat;
@@ -62,6 +60,20 @@ class question_edit_ddmatch_form extends question_edit_form {
                         $subquestion->questiontext // text
                     );
                     $default_values['subquestions['.$key.']']['itemid'] = $draftid;
+
+                    $draftid = file_get_submitted_draft_itemid('subanswers['.$key.']');
+                    $default_values['subanswers['.$key.']'] = array();
+                    $default_values['subanswers['.$key.']']['format'] = $subquestion->answertextformat;
+                    $default_values['subanswers['.$key.']']['text'] = file_prepare_draft_area(
+                        $draftid, // draftid
+                        $this->context->id, // context
+                        'qtype_ddmatch', // component
+                        'subanswer', // filarea
+                        !empty($subquestion->id)?(int)$subquestion->id:null, // itemid
+                        $this->fileoptions, // options
+                        $subquestion->answertext // text
+                    );
+                    $default_values['subanswers['.$key.']']['itemid'] = $draftid;
 
                     $key++;
                 }
@@ -84,7 +96,7 @@ class question_edit_ddmatch_form extends question_edit_form {
         $answercount = 0;
         foreach ($questions as $key => $question){
             $trimmedquestion = trim($question['text']);
-            $trimmedanswer = trim($answers[$key]);
+            $trimmedanswer = trim($answers[$key]['text']);
             if ($trimmedquestion != ''){
                 $questioncount++;
             }
