@@ -291,8 +291,9 @@ class question_ddmatch_qtype extends default_questiontype {
         $ff = check_browser_version('Gecko', 20051106);
         $op = check_browser_version('Opera', 9.0);
         $sa = check_browser_version('Safari', 412);
+        $ch = check_browser_version('Chrome', 6);
 
-        if ((!$ie && !$ff && !$op && !$sa) or !empty($USER->screenreader)) {
+        if ((!$ie && !$ff && !$op && !$sa && !$ch) or !empty($USER->screenreader)) {
             $fallbackonly = true;
         }
 
