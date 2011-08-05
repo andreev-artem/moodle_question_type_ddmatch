@@ -71,6 +71,9 @@ function xmldb_qtype_ddmatch_upgrade($oldversion) {
     if ($oldversion < 2011080300) {
         $table = new xmldb_table('question_ddmatch_sub');
 
+        $field = new xmldb_field('answertext', XMLDB_TYPE_TEXT, 'small', null, XMLDB_NOTNULL, null, null, 'questiontextformat');
+        $dbman->change_field_type($table, $field);
+        
         $field = new xmldb_field('answertextformat', XMLDB_TYPE_INTEGER, '2', null, XMLDB_NOTNULL, null, '0', 'answertext');
         if (!$dbman->field_exists($table, $field)) {
             $dbman->add_field($table, $field);
@@ -87,11 +90,102 @@ function xmldb_qtype_ddmatch_upgrade($oldversion) {
             $rs->close();
         }
         
-        $field = new xmldb_field('answertext', XMLDB_TYPE_TEXT, 'small', null, XMLDB_NOTNULL, null, null, 'questiontextformat');
-        $dbman->change_field_type($table, $field);
-        
         upgrade_plugin_savepoint(true, 2011080300, 'qtype', 'ddmatch');
     }
 
+    if ($oldversion < 2011080500) {
+
+        $table = new xmldb_table('question_ddmatch');
+        
+        // Define field correctfeedback to be added to question_ddmatch
+        $field = new xmldb_field('correctfeedback', XMLDB_TYPE_TEXT, 'small', null,
+                null, null, null, 'shuffleanswers');
+
+        // Conditionally launch add field correctfeedback
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+
+            // Now fill it with '';
+            $DB->set_field('question_ddmatch', 'correctfeedback', '');
+
+            // Now add the not null constraint.
+            $field = new xmldb_field('correctfeedback', XMLDB_TYPE_TEXT, 'small', null,
+                    XMLDB_NOTNULL, null, null, 'shuffleanswers');
+            $dbman->change_field_notnull($table, $field);
+        }
+
+        // Define field correctfeedbackformat to be added to question_ddmatch
+        $field = new xmldb_field('correctfeedbackformat', XMLDB_TYPE_INTEGER, '2', null,
+                XMLDB_NOTNULL, null, '0', 'correctfeedback');
+
+        // Conditionally launch add field correctfeedbackformat
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Define field partiallycorrectfeedback to be added to question_ddmatch
+        $field = new xmldb_field('partiallycorrectfeedback', XMLDB_TYPE_TEXT, 'small', null,
+                null, null, null, 'correctfeedbackformat');
+
+        // Conditionally launch add field partiallycorrectfeedback
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+
+            // Now fill it with '';
+            $DB->set_field('question_ddmatch', 'partiallycorrectfeedback', '');
+
+            // Now add the not null constraint.
+            $field = new xmldb_field('partiallycorrectfeedback', XMLDB_TYPE_TEXT, 'small', null,
+                    XMLDB_NOTNULL, null, null, 'correctfeedbackformat');
+            $dbman->change_field_notnull($table, $field);
+        }
+
+        // Define field partiallycorrectfeedbackformat to be added to question_ddmatch
+        $field = new xmldb_field('partiallycorrectfeedbackformat', XMLDB_TYPE_INTEGER, '2', null,
+                XMLDB_NOTNULL, null, '0', 'partiallycorrectfeedback');
+
+        // Conditionally launch add field partiallycorrectfeedbackformat
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Define field incorrectfeedback to be added to question_ddmatch
+        $field = new xmldb_field('incorrectfeedback', XMLDB_TYPE_TEXT, 'small', null,
+                null, null, null, 'partiallycorrectfeedbackformat');
+
+        // Conditionally launch add field incorrectfeedback
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+
+            // Now fill it with '';
+            $DB->set_field('question_ddmatch', 'incorrectfeedback', '');
+
+            // Now add the not null constraint.
+            $field = new xmldb_field('incorrectfeedback', XMLDB_TYPE_TEXT, 'small', null,
+                    XMLDB_NOTNULL, null, null, 'partiallycorrectfeedbackformat');
+            $dbman->change_field_notnull($table, $field);
+        }
+
+        // Define field incorrectfeedbackformat to be added to question_ddmatch
+        $field = new xmldb_field('incorrectfeedbackformat', XMLDB_TYPE_INTEGER, '2', null,
+                XMLDB_NOTNULL, null, '0', 'incorrectfeedback');
+
+        // Conditionally launch add field incorrectfeedbackformat
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Define field shownumcorrect to be added to question_ddmatch
+        $field = new xmldb_field('shownumcorrect', XMLDB_TYPE_INTEGER, '2', null,
+                XMLDB_NOTNULL, null, '0', 'incorrectfeedbackformat');
+
+        // Conditionally launch add field shownumcorrect
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // match savepoint reached
+        upgrade_plugin_savepoint(true, 2011080500, 'qtype', 'ddmatch');
+    }    
     return true;
 }
