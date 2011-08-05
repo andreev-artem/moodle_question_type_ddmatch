@@ -19,9 +19,32 @@ defined('MOODLE_INTERNAL') || die();
  */
 class qtype_ddmatch_renderer extends qtype_with_combined_feedback_renderer {
 
+    public function head_code(question_attempt $qa) {
+        global $PAGE;
+
+        if ($this->can_use_drag_and_drop())
+            $PAGE->requires->js('/question/type/ddmatch/script.js');
+    }
+
     public function formulation_and_controls(question_attempt $qa,
             question_display_options $options) {
         return $this->construct_qa_with_select($qa, $options);
+    }
+
+    protected function can_use_drag_and_drop() {
+        global $USER;
+
+        $ie = check_browser_version('MSIE', 6.0);
+        $ff = check_browser_version('Gecko', 20051106);
+        $op = check_browser_version('Opera', 9.0);
+        $sa = check_browser_version('Safari', 412);
+        $ch = check_browser_version('Chrome', 6);
+
+        if ((!$ie && !$ff && !$op && !$sa && !$ch) or !empty($USER->screenreader)) {
+            return false;
+        }
+
+        return true;
     }
 
     // used when js disabled
