@@ -118,10 +118,16 @@ class qtype_ddmatch_renderer extends qtype_with_combined_feedback_renderer {
         return $this->combined_feedback($qa);
     }
 
-    protected function format_choices($question) {
+    protected function format_choices(question_attempt $qa, $rawhtml=false) {
+        $question = $qa->get_question();
         $choices = array();
         foreach ($question->get_choice_order() as $key => $choiceid) {
-            $choices[$key] = htmlspecialchars($question->choices[$choiceid]);
+            $choice = $question->choices[$choiceid];
+            $choice = $question->format_text(
+                    $choice, $question->choiceformat[$choiceid],
+                    $qa, 'qtype_ddmatch', 'subanswer', $choiceid);
+            if ($rawhtml) $choices[$key] = $choice;
+            else $choices[$key] = htmlspecialchars($choice);
         }
         return $choices;
     }
@@ -131,18 +137,21 @@ class qtype_ddmatch_renderer extends qtype_with_combined_feedback_renderer {
 
         $question = $qa->get_question();
         $stemorder = $question->get_stem_order();
-
-        $choices = $this->format_choices($question);
-        $right = array();
+        $choices = $this->format_choices($qa, true);
+        
+        $table = new html_table();
+        $table->attributes['class'] = 'generaltable correctanswertable';
+        $table->size = array('50%', '50%');
         foreach ($stemorder as $key => $stemid) {
-            $right[] = $question->format_text($question->stems[$stemid],
+            $row = new html_table_row();
+            $row->cells[] = $question->format_text($question->stems[$stemid],
                     $question->stemformat[$stemid], $qa,
-                    'qtype_ddmatch', 'subquestion', $stemid) . ' – ' .
-                    $choices[$question->get_right_choice_for($stemid)];
+                    'qtype_ddmatch', 'subquestion', $stemid);
+            $row->cells[] = $choices[$question->get_right_choice_for($stemid)];
+
+            $table->data[] = $row;
         }
 
-        if (!empty($right)) {
-            return get_string('correctansweris', 'qtype_ddmatch', implode(', ', $right));
-        }
+        return get_string('correctansweris', 'qtype_match', html_writer::table($table));
     }
 }
