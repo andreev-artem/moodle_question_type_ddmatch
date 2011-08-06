@@ -127,6 +127,8 @@ class qtype_ddmatch_renderer extends qtype_with_combined_feedback_renderer {
     }
 
     public function correct_response(question_attempt $qa) {
+        if ($qa->get_state()->is_correct()) return '';
+
         $question = $qa->get_question();
         $stemorder = $question->get_stem_order();
 
