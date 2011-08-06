@@ -55,7 +55,7 @@ class qtype_ddmatch_renderer extends qtype_with_combined_feedback_renderer {
         $stemorder = $question->get_stem_order();
         $response = $qa->get_last_qt_data();
 
-        $choices = $this->format_choices($question);
+        $choices = $this->format_choices($qa);
 
         $result = '';
         $result .= html_writer::tag('div', $question->format_questiontext($qa),
@@ -69,7 +69,7 @@ class qtype_ddmatch_renderer extends qtype_with_combined_feedback_renderer {
         foreach ($stemorder as $key => $stemid) {
 
             $result .= html_writer::start_tag('tr', array('class' => 'r' . $parity));
-            $fieldname = 'sub' . $key;
+            $fieldname = $question->get_field_name($key);
 
             $result .= html_writer::tag('td', $question->format_text(
                     $question->stems[$stemid], $question->stemformat[$stemid],

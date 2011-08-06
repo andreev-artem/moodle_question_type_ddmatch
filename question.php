@@ -75,4 +75,9 @@ class qtype_ddmatch_question extends qtype_match_question {
                     $args, $forcedownload);
         }
     }
+
+    public function get_field_name($key) {
+        return $this->field($key);
+    }
+
 }
