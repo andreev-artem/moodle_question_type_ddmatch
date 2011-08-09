@@ -36,7 +36,7 @@ defined('MOODLE_INTERNAL') || die();
  * @copyright  2010 The Open University
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class qtype_match_qe2_attempt_updater extends question_qtype_attempt_updater {
+class qtype_ddmatch_qe2_attempt_updater extends question_qtype_attempt_updater {
     protected $stems;
     protected $choices;
     protected $right;
