@@ -51,6 +51,6 @@
     margin-bottom: 0.5em;
 }
 
-.ddmatch .im-controls {
-    clear: both;
+.ddmatch .correctanswertable {
+    margin: 10px;
 }

@@ -10,7 +10,6 @@
 (function() {
 
 var Dom = YAHOO.util.Dom;
-var Event = YAHOO.util.Event;
 var DDM = YAHOO.util.DragDropMgr;
 
 // Override DDM moveToEl function to prevent it from repositioning items
@@ -107,145 +106,91 @@ YAHOO.extend(MoodleDDMatchItem, YAHOO.util.DDProxy, {
             li.setAttribute("id", idparts[0] + "_0");
             li.appendChild(document.createTextNode(this.dragstring));
             el.parentNode.appendChild(li);
+            
+            Dom = YAHOO.util.Dom;
+            inputhidden = Dom.get(el.parentNode.getAttribute("name"));
+            inputhidden.setAttribute("value", 0);
 
             // delete the item
             el.parentNode.removeChild(el);
         }
     },
 
-    moveItem: function(el1, el2) {
-        el1parent = el1.parentNode;
+    moveItem: function(eldragged, eltargetul) {
+        eldraggedparent = eldragged.parentNode;
 
         // remove the item currently in the target
-        for (i = 0; i < el2.childNodes.length; i++) {
-            el2.removeChild(el2.childNodes[0]);
+        for (i = 0; i < eltargetul.childNodes.length; i++) {
+            eltargetul.removeChild(eltargetul.childNodes[0]);
         }
 
         // if the item was moved from the origin, make a copy and move
-        if (el1parent.id.match("origin")) {
-            el1copy = el1.cloneNode(true);
+        if (eldraggedparent.id.match("origin")) {
+            el1copy = eldragged.cloneNode(true);
             el1copy.setAttribute("id", "");
             el1id = Dom.generateId(el1copy, "_");
-            el1copy.setAttribute("id", el1.id + el1id);
-            el2.appendChild(el1copy);
-            new MoodleDDMatchItem(el1copy.id, this.sGroup, '', this.dragstring);
+            el1copy.setAttribute("id", eldragged.id + el1id);
+            eltargetul.appendChild(el1copy);
+            new MoodleDDMatchItem(el1copy.id, this.sGroup, '', this.dragstring);            
         }
         // else move item
         else {
             // add dragstring back to empty box
-            idparts = el1.id.split("_");
+            idparts = eldragged.id.split("_");
             li = document.createElement("li");
             li.setAttribute("id", idparts[0] + "_0");
             li.appendChild(document.createTextNode(this.dragstring));
-            el1parent.appendChild(li);
+            eldraggedparent.appendChild(li);
 
             // remove from origin
-            el1parent.removeChild(el1);
+            eldraggedparent.removeChild(eldragged);
             
             // add to target
-            el2.appendChild(el1);
+            eltargetul.appendChild(eldragged);
+            
+            Dom = YAHOO.util.Dom;
+            inputhidden = Dom.get(eldraggedparent.getAttribute("name"));
+            inputhidden.setAttribute("value", 0);
         }
+
+        Dom = YAHOO.util.Dom;
+        inputhidden = Dom.get(eltargetul.getAttribute("name"));
+        idparts = eldragged.id.split("_");
+        inputhidden.setAttribute("value", idparts[1]);
     }
 
 });
 
 })();
 
-// Replace the drop-down menus with drop targets and initialize the draggables
-function ddMatchingInit(vars) {
-    id = vars.id;
-    questions = vars.questions;
-    answers = vars.answers;
-    responses = vars.responses;
-    readonly = vars.readonly;
-    dragstring = vars.dragstring;
+M.ddmatch = {}
 
-    tdid = "td" + id;
-    menuid = "menu" + id;
-
-    Dom = YAHOO.util.Dom;
-
-    qlength = questions.length;
-    var td = null;
-
-    for (i = 0; i < qlength; i++) {
-        ul = document.createElement("ul");
-        ul.setAttribute("id", "ultarget" + id + questions[i]);
-        if (responses[i] == 0) {
-            li = document.createElement("li");
-            li.setAttribute("id", "drag" + id + "0");
-            li.appendChild(document.createTextNode(dragstring));
-            ul.appendChild(li);
-        } else {
-            li = Dom.get("drag" + id + responses[i]);
-            licopy = li.cloneNode(true);
-            licopy.setAttribute("id", "");
-            liid = Dom.generateId(licopy, "drag" + id + responses[i] + "_");
-            licopy.setAttribute("id", liid);
-            ul.appendChild(licopy);
-            if (!readonly) {
-                new MoodleDDMatchItem(licopy.id, id, '', dragstring);
-            }
-        }
-        Dom.addClass(ul, "matchtarget");
-        Dom.addClass(ul, "matchdefault");
-        if (!readonly) {
-            new YAHOO.util.DDTarget("ultarget" + id + questions[i], id);
-        }
-
-        td = Dom.get(tdid + questions[i]);
-        menu = Dom.get(menuid + questions[i]);
-        td.replaceChild(ul, menu);
-    }
+// Replace the ablock menus with drag&drop enabled ablock and initialize the draggables
+M.ddmatch.Init = function(vars) {
+    var id = vars.id;
+    var stems = vars.stems;
+    var choices = vars.choices;
+    var selectedids = vars.selectedids;
+    var readonly = vars.readonly;
+    var dragstring = vars.dragstring;
+    
+    var Dom = YAHOO.util.Dom;
+    var ablock = Dom.get("ablock_" + id);
+    ablock.innerHTML = vars.ablock;
+    var innerablock = ablock.firstChild;
+    ablock.parentNode.replaceChild(innerablock, ablock);
 
     if (!readonly) {
-        alength = answers.length
-        for (i = 0; i < alength; i++) {
-            new MoodleDDMatchItem("drag" + id + answers[i], id, '', dragstring);
-        }
-    }
-}
-
-// Set the hidden response variables according to the id of the item currently
-// in each target list
-function ddMatchingSetHiddens(event, vars) {;
-    var id = vars.id;
-    var questions = vars.questions;
-
-    var Dom = YAHOO.util.Dom;
-
-    var ul = null;
-    var items = null;
-    var answer = "0";
-
-    for (i = 0; i < questions.length; i++) {
-        ul = Dom.get("ultarget" + id + questions[i]);
-
-        items = ul.getElementsByTagName("li");
-        if (items.length > 0) {
-            itemid = items[0].id; // there should only be one item in the list
-            itemidparts = itemid.split("_");
-            answer = itemidparts[1];
-        }
-        else {
-            answer = "0";
+        for (i in stems) {
+            new YAHOO.util.DDTarget("ultarget" + id + "_" + stems[i], id);
         }
 
-        hidden = Dom.get("hidden" + id + questions[i]);
-        hidden.value = answer;
+        for (i in choices) {
+            new MoodleDDMatchItem("drag" + id + "_" + i, id, "", dragstring);
+        }
+        
+        for (i in selectedids) {
+            new MoodleDDMatchItem(selectedids[i], id, "", dragstring);
+        }
     }
-}
-
-// Cross-browser method to create variables with the name attribute
-function createElementWithName(type, name) {
-    try {
-        // This should work in IE and throw an exception everywhere else
-        var element = document.createElement('<' + type + ' name="' + name + '">');
-    } catch (e) {
-        // Compliant method that doesn't work in IE
-        var element = document.createElement(type);
-        element.setAttribute("name", name);
-    }
-
-    return element;
 }
