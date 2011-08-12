@@ -138,6 +138,8 @@ abstract class formulation_and_controls_base {
     }
 
     public function construct() {
+        $response = $this->qa->get_last_qt_data();
+
         $result = '';
         $result .= $this->construct_qtext();
 
