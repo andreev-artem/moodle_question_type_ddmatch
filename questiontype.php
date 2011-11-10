@@ -223,4 +223,176 @@ class qtype_ddmatch extends question_type {
         $fs->delete_area_files($contextid, 'qtype_ddmatch',
                 'incorrectfeedback', $questionid);
     }
+	
+/// IMPORT EXPORT FUNCTIONS ////////////////////////////
+    /**
+     * Translate human readable format name
+     * into internal Moodle code number
+     * @param string name format name from xml file
+     * @return int Moodle format code
+	 * copied from format/xml/format.php
+	 * because can't be used as declared protected
+     */
+    protected function trans_format($name) {
+        $name = trim($name);
+
+        if ($name == 'moodle_auto_format') {
+            return FORMAT_MOODLE;
+        } else if ($name == 'html') {
+            return FORMAT_HTML;
+        } else if ($name == 'plain_text') {
+            return FORMAT_PLAIN;
+        } else if ($name == 'wiki_like') {
+            return FORMAT_WIKI;
+        } else if ($name == 'markdown') {
+            return FORMAT_MARKDOWN;
+        } else {
+            return 0; // or maybe warning required
+        }
+    }
+	
+    /**
+     * Convert internal Moodle text format code into
+     * human readable form
+     * @param int id internal code
+     * @return string format text
+	 * copied from format/xml/format.php
+	 * because can't be used as declared protected
+     */
+    protected function get_format($id) {
+        switch($id) {
+            case FORMAT_MOODLE:
+                return 'moodle_auto_format';
+            case FORMAT_HTML:
+                return 'html';
+            case FORMAT_PLAIN:
+                return 'plain_text';
+            case FORMAT_WIKI:
+                return 'wiki_like';
+            case FORMAT_MARKDOWN:
+                return 'markdown';
+            default:
+                return 'unknown';
+        }
+    }
+	
+    /**
+    * Convert files into text output in the given format.
+    * This method is copied from qformat_default as a quick fix, as the method there is
+    * protected.
+    * @param array
+    * @param string encoding method
+    * @return string $string
+    */
+    public function write_files($files, $indent) {
+        if (empty($files)) {
+            return '';
+        }
+        $string = '';
+        foreach ($files as $file) {
+            if ($file->is_directory()) {
+                continue;
+            }
+            $string .= str_repeat(' ', $indent);
+            $string .= '<file name="' . $file->get_filename() . '" encoding="base64">';
+            $string .= base64_encode($file->get_content());
+            $string .= "</file>\n";
+        }
+        return $string;
+    }
+    /**
+     ** Provide export functionality for xml format
+     ** @param question object the question object
+     ** @param format object the format object so that helper methods can be used 
+     ** @param extra mixed any additional format specific data that may be passed by the format (see format code for info)
+     ** @return string the data to append to the output buffer or false if error
+     **/
+    function export_to_xml( $question, $format, $extra ) {
+        $expout = '';
+        $fs = get_file_storage();
+        $contextid = $question->contextid;
+		$expout .= $format->write_combined_feedback($question->options);
+        $expout .= $format->write_hints($question);
+        foreach($question->options->subquestions as $subquestion) {
+            $files = $fs->get_area_files($contextid, 'qtype_ddmatch', 'subquestion', $subquestion->id);
+            $textformat = $this->get_format($subquestion->questiontextformat);
+            $expout .= "<subquestion format=\"$textformat\">\n";
+            $expout .= $format->writetext( $subquestion->questiontext );
+            $expout .= $this->write_files($files, 2);
+            $expout .= "<answer format=\"$textformat\">\n";
+			$expout .= $format->writetext( $subquestion->answertext );
+			$files = $fs->get_area_files($contextid, 'qtype_ddmatch', 'subanswer', $subquestion->id);
+			$expout .= $this->write_files($files, 2);
+			$expout .= "</answer>\n";
+            $expout .= "</subquestion>\n";
+        }
+
+        return $expout;
+    }
+
+   /**
+    ** Provide import functionality for xml format
+    ** @param data mixed the segment of data containing the question
+    ** @param question object question object processed (so far) by standard import code
+    ** @param format object the format object so that helper methods can be used (in particular error() )
+    ** @param extra mixed any additional format specific data that may be passed by the format (see format code for info)
+    ** @return object question object suitable for save_options() call or false if cannot handle
+    **/
+   function import_from_xml( $data, $question, $format, $extra=null ) {
+       // check question is for us
+       $qtype = $data['@']['type'];
+       if ($qtype=='ddmatch') {
+           $question = $format->import_headers( $data );
+
+            // header parts particular to matching
+            $question->qtype = $qtype;
+            $question->shuffleanswers = $format->getpath( $data, array( '#','shuffleanswers',0,'#' ), 1 );
+        
+            // get subquestions
+            $subquestions = $data['#']['subquestion'];
+            $question->subquestions = array();
+            $question->subanswers = array();
+
+            // run through subquestions
+            foreach ($subquestions as $subquestion) {
+                $qo = array();
+                $qo['text'] = $format->getpath($subquestion, array('#', 'text', 0, '#'), '', true);
+                $qo['format'] = $this->trans_format(
+                        $format->getpath($subquestion, array('@', 'format'), 'html'));
+                $qo['files'] = array();
+
+                $files = $format->getpath($subquestion, array('#', 'file'), array());
+                foreach ($files as $file) {
+                    $record = new stdclass();
+                    $record->content = $file['#'];
+                    $record->encoding = $file['@']['encoding'];
+                    $record->name = $file['@']['name'];
+                    $qo['files'][] = $record;
+                }
+                $question->subquestions[] = $qo;
+				$answers = $format->getpath($subquestion, array('#', 'answer', 0), array());
+				$ans = array();
+				$ans['text'] = $format->getpath($subquestion, array('#','answer',0,'#','text',0,'#'), '', true);
+				$ans['format'] = $this->trans_format(
+                        $format->getpath($answers, array('@', 'format'), 'html'));
+                $ans['files'] = array();
+                $files = $format->getpath($answers, array('#', 'file'), array());
+                foreach ($files as $file) {
+                    $record = new stdclass();
+                    $record->content = $file['#'];
+                    $record->encoding = $file['@']['encoding'];
+                    $record->name = $file['@']['name'];
+                    $ans['files'][] = $record;
+                }
+                $question->subanswers[] = $ans;
+            }
+			echo "ici";var_dump($question);var_dump($data);
+			$format->import_combined_feedback($question, $data, true);
+			$format->import_hints($question, $data, true);
+            return $question;
+       }
+       else {
+           return false;
+       }
+    } 
 }
