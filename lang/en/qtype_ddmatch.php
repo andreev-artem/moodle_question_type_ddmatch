@@ -15,5 +15,6 @@ $string['ddmatch_link'] = 'question/type/ddmatch';
 $string['ddmatchsummary'] = 'An extension of the matching question that allows the user to drag and drop items to match answers to subquestions.';
 $string['draganswerhere'] = 'Drag answer here';
 $string['editingddmatch'] = 'Editing Drag-and-Drop Matching Question';
+$string['pluginname'] = 'Drag-and-Drop Matching Question';
 
 ?>

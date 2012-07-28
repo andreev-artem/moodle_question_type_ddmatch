@@ -114,7 +114,7 @@ class qtype_ddmatch_renderer extends qtype_with_combined_feedback_renderer {
         return parent::feedback_class($fraction);
     }
 
-    public function feedback_image($fraction) {
+    public function feedback_image($fraction, $selected = true) {
         return parent::feedback_image($fraction);
     }
 }

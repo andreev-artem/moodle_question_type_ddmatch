@@ -307,11 +307,11 @@ class qtype_ddmatch extends question_type {
      ** @param extra mixed any additional format specific data that may be passed by the format (see format code for info)
      ** @return string the data to append to the output buffer or false if error
      **/
-    function export_to_xml( $question, $format, $extra ) {
+    function export_to_xml($question, qformat_xml $format, $extra=null) {
         $expout = '';
         $fs = get_file_storage();
         $contextid = $question->contextid;
-		$expout .= $format->write_combined_feedback($question->options);
+		$expout .= $format->write_combined_feedback($question->options, $question->id, $contextid);
         $expout .= $format->write_hints($question);
         foreach($question->options->subquestions as $subquestion) {
             $files = $fs->get_area_files($contextid, 'qtype_ddmatch', 'subquestion', $subquestion->id);
@@ -338,7 +338,7 @@ class qtype_ddmatch extends question_type {
     ** @param extra mixed any additional format specific data that may be passed by the format (see format code for info)
     ** @return object question object suitable for save_options() call or false if cannot handle
     **/
-   function import_from_xml( $data, $question, $format, $extra=null ) {
+   function import_from_xml($data, $question, qformat_xml $format, $extra=null) {
        // check question is for us
        $qtype = $data['@']['type'];
        if ($qtype=='ddmatch') {
