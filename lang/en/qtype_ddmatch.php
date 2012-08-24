@@ -1,7 +1,7 @@
 <?php
 /**
  * The language strings for the match question type.
- *    
+ *
  * @copyright &copy; 2007 Adriane Boyd
  * @author adrianeboyd@gmail.com
  * @license http://www.gnu.org/copyleft/gpl.html GNU Public License
@@ -16,5 +16,7 @@ $string['ddmatchsummary'] = 'An extension of the matching question that allows t
 $string['draganswerhere'] = 'Drag answer here';
 $string['editingddmatch'] = 'Editing Drag-and-Drop Matching Question';
 $string['pluginname'] = 'Drag-and-Drop Matching Question';
+$string['pluginnameadding'] = 'Adding Drag-and-Drop Matching Question';
+$string['pluginnameediting'] = 'Editing Drag-and-Drop Matching Question';
 
 ?>
