@@ -43,7 +43,6 @@ class qtype_ddmatch_edit_form extends question_edit_form {
                 get_string('shuffle', 'qtype_match'), null, null, array(0, 1));
         $mform->addHelpButton('shuffleanswers', 'shuffle', 'qtype_match');
         $mform->setDefault('shuffleanswers', 1);
-        $mform->setType('shuffleanswers', PARAM_BOOL);
 
         $mform->addElement('static', 'answersinstruct',
                 get_string('availablechoices', 'qtype_match'),
@@ -98,7 +97,7 @@ class qtype_ddmatch_edit_form extends question_edit_form {
             );
             $question->subanswers[$key]['format'] = $subquestion->answertextformat;
             $question->subanswers[$key]['itemid'] = $draftid;
-
+            
             $key++;
         }
 

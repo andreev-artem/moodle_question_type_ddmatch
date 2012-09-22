@@ -108,14 +108,13 @@ class qtype_ddmatch_renderer extends qtype_with_combined_feedback_renderer {
 
         return get_string('correctansweris', 'qtype_match', html_writer::table($table));
     }
-
     // needed for formulation_and_controls_* classes
     public function feedback_class($fraction) {
         return parent::feedback_class($fraction);
     }
 
     public function feedback_image($fraction, $selected = true) {
-        return parent::feedback_image($fraction);
+        return parent::feedback_image($fraction, $selected);
     }
 }
 
